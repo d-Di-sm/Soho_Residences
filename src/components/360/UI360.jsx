@@ -316,7 +316,7 @@ const UI360 = ({
 
       {/* Botones Info, Mapa, Return (mismo estilo que Residences / Amenities) */}
       <div
-        className="z-10 fixed bottom-4 left-0 w-full md:w-auto md:left-1/2 md:-translate-x-1/2
+        className="z-[100] fixed bottom-4 left-0 w-full md:w-auto md:left-1/2 md:-translate-x-1/2
           text-center p-4 flex flex-col gap-[25%] md:flex-row md:gap-6 items-center justify-center md:items-start md:justify-center pointer-events-auto"
       >
         <motion.button

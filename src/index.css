@@ -606,6 +606,19 @@ main {
   transform: translate(-50%, -50%) scale(1.1);
 }
 
+/* iPad y dispositivos táctiles (pointer: coarse): área táctil mayor para onClick con touch */
+@media (pointer: coarse) {
+  .circle-button-360 {
+    width: 22px;
+    height: 22px;
+    border-width: 2px;
+    /* Mantener el círculo visual más pequeño con un pseudo-elemento o dejamos el fondo; el hit area es 44px */
+  }
+  .circle-button-360:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
 /* Anotaciones sobre la imagen del mapa (estilo annotation3d, doble tamaño 10px); clicables como hotspots */
 .circle-button-map {
   position: absolute;

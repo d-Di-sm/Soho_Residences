@@ -50,9 +50,29 @@ function LoadingGate360() {
   return null;
 }
 
+function SetPixelRatio() {
+  const { gl: renderer } = useThree();
+  const [isMobile] = useAtom(isMobileAtom);
+  useLayoutEffect(() => {
+    if (!renderer) return;
+    renderer.setPixelRatio(
+      isMobile
+        ? Math.min(window.devicePixelRatio, 1.5)
+        : window.devicePixelRatio,
+    );
+  }, [renderer, isMobile]);
+  return null;
+}
+
 // function Panorama({ textureUrl, opacity }) {
-function Panorama({ textureUrl, opacity, shouldFlipTextures }) {
+function Panorama({
+  textureUrl,
+  opacity,
+  shouldFlipTextures,
+  isMobile = false,
+}) {
   const texture = useTexture(textureUrl);
+  const { gl: renderer } = useThree();
 
   // Asegurar que las texturas JPG se traten como sRGB
   if (texture) {
@@ -74,8 +94,16 @@ function Panorama({ textureUrl, opacity, shouldFlipTextures }) {
       texture.offset.x = 0;
     }
 
+    // Calidad de textura en móvil: mipmaps y anisotropía para reducir shimmering
+    if (isMobile && renderer) {
+      texture.generateMipmaps = true;
+      texture.minFilter = THREE.LinearMipmapLinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    }
+
     texture.needsUpdate = true;
-  }, [texture, shouldFlipTextures]);
+  }, [texture, shouldFlipTextures, isMobile, renderer]);
 
   return (
     <a.mesh scale={[-1, 1, 1]}>
@@ -102,6 +130,13 @@ function Hotspot({ position, label, onClick }) {
     }
   });
 
+  const handlePointerDown = (e) => {
+    e.stopPropagation();
+  };
+  const handlePointerUp = (e) => {
+    e.stopPropagation();
+  };
+
   return (
     <>
       <group position={position} ref={groupRef}>
@@ -114,10 +149,14 @@ function Hotspot({ position, label, onClick }) {
           <button
             // className={isInViewMode ? "circle-button-views" : "circle-button"}
 
+            type="button"
             className="circle-button-360"
             onClick={onClick}
+            onPointerDown={handlePointerDown}
+            onPointerUp={handlePointerUp}
             onPointerEnter={() => setHovered(true)}
             onPointerLeave={() => setHovered(false)}
+            style={{ touchAction: "manipulation" }}
           />
         </Html>
       </group>
@@ -534,6 +573,7 @@ export default function Recorrido360({
       >
         <color attach="background" args={["#2E3641"]} />
         <LoadingGate360 />
+        <SetPixelRatio />
 
         <Suspense fallback={null}>
           {/* Panorama actual */}
@@ -542,6 +582,7 @@ export default function Recorrido360({
             textureUrl={current.texture}
             opacity={opacity}
             shouldFlipTextures={shouldFlipTextures}
+            isMobile={isMobile}
           />
 
           {/* Hotspots (ocultos si el modal del 360 está activo o si hay transición de vuelta al 3d) */}
